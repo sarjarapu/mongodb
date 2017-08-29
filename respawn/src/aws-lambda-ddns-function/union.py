@@ -36,7 +36,7 @@ def lambda_handler(event, context):
     table = dynamodb_resource.Table('DDNS')
     print 'lambda_handler.completed fetching dynamodb_resource.Table. state: ', state
     if state == 'running':
-        time.sleep(60)
+        time.sleep(5)
         print 'state: running, fetching compute.describe_instances: ', instance_id
         instance = compute.describe_instances(InstanceIds=[instance_id])
         print 'state: running, completed fetching compute.describe_instances: ', instance_id

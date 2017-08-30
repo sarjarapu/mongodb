@@ -1,0 +1,20 @@
+---  
+- name: install and configure mongodb in replicaset instances
+  hosts: "rs_servers"
+  gather_facts: no
+  roles:
+    - role: mongo
+      mongo_version: "3.2.12"
+
+- name: "create replicaset: {{replset_name}}"
+  hosts: "rs_servers[0]"
+  gather_facts: no
+  vars:
+    members: 
+        - "{{hostvars[groups.rs_servers[0]].inventory_hostname}}:{{mongo_port}}"
+        - "{{hostvars[groups.rs_servers[1]].inventory_hostname}}:{{mongo_port}}"
+        - "{{hostvars[groups.rs_servers[2]].inventory_hostname}}:{{mongo_port}}"
+  tasks:
+    - include_role:
+        name: mongo
+        tasks_from: "initiate.replicaset"

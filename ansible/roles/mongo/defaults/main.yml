@@ -1,0 +1,12 @@
+---
+# defaults file for mongo
+mongo_version: "3.2.12"
+replset_name: "rs"
+mongo_port: "27017"
+#storage_engine: "mmapv1"
+storage_engine: "wiredTiger"
+data_folder: "/var/lib/mongodb"
+log_path: "/var/log/mongodb/mongod.log"
+mongod_config_path: "/etc/mongod.conf"
+bind_ip: "0.0.0.0"
+shard_role: ""

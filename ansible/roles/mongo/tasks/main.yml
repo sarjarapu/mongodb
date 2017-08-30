@@ -1,0 +1,68 @@
+---
+- name: print the primary hostname, replicaset name, mongo port and members
+  debug: msg="inventory_hostname [{{inventory_hostname}}], replicaset [{{replset_name}}], mongo_port [{{mongo_port}}]"
+
+- name: add mongodb-{{ mongo_version[0:3] }} to yum repo 
+  become: true
+  yum_repository: 
+    name: "mongodb-org-{{ mongo_version[0:3] }}"
+    description: MongoDB Repository
+    baseurl: https://repo.mongodb.com/yum/redhat/$releasever/mongodb-enterprise/3.2/$basearch/
+    gpgcheck: yes
+    enabled: yes
+    gpgkey: https://www.mongodb.org/static/pgp/server-3.2.asc
+    state: present
+
+- name: install mongodb enterprise {{ mongo_version }}
+  become: true
+  yum: 
+    name: "mongodb-enterprise-{{ mongo_version }}"
+    state: present
+
+- name: copy the {{mongod_config_path}}
+  become: true
+  template:
+    src: "mongod.conf"
+    dest: "{{mongod_config_path}}"
+    mode: 0644
+
+- name: create the /var/lib/mongodb folders
+  become: true
+  file: 
+    path: "{{data_folder}}"
+    state: directory
+    owner: mongod
+    group: mongod
+    mode: 0755
+
+- name: stop mongod service
+  become: true
+  service:
+    name: mongod
+    state: stopped
+    enabled: yes
+    
+- name: disable selinux
+  become: true
+  selinux:
+    state: disabled
+    policy: targeted
+
+- name: remove any lock, pid files folders
+  become: true
+  file: 
+    path: "{{item}}"
+    state: absent
+    owner: mongod
+    group: mongod
+    mode: 0755
+  with_items:
+    - /var/lib/mongodb/mongod.lock
+    - /var/run/mongodb/mongod.pid
+
+- name: start mongod service
+  become: true
+  service:
+    name: mongod
+    state: started
+    enabled: yes

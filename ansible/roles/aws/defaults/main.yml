@@ -1,0 +1,33 @@
+---
+ami: "{{ redhat_ami }}"
+instance_type: "t2.micro"
+tag_expireon: "2017-09-30"
+data_vol_size: 30
+group_name: "skamon"
+app_name: "demoapp"
+replset_prefix: "rs"
+server_number: '01'
+ssh_user: "ec2-user"
+tag_owner: "shyam.arjarapu"
+
+instance_name: "{{ group_name }}_{{ app_name }}_{{replset_prefix}}{{ server_number }}"
+server_group_name: "{{ group_name}}_{{ app_name }}_{{replset_prefix}}"
+
+
+##################
+# IMPORTANT:
+##################
+# office us-west-2c
+region: "us-west-2"
+security_key: "ska-play"
+security_group: "ska-sg-aws"
+redhat_ami: "ami-9fa343e7"
+
+
+availability_zone: "{{ region }}c"
+create_data_folder: True
+data_folder: "/app/mongodb"
+swap_location: /etc/xvdf
+
+# ami instances 
+# redhat_ami: "ami-9fa343e7" # us-west-2

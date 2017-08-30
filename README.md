@@ -1,3 +1,42 @@
+Install MongoDB
+=========
+
+sudo tee /etc/yum.repos.d/mongodb-enterprise-3.2.repo <<EOF
+[mongodb-enterprise-32]
+name=MongoDB Enterprise Repository
+baseurl=https://repo.mongodb.com/yum/redhat/\$releasever/mongodb-enterprise/3.2/\$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
+EOF
+sudo yum install -y mongodb-enterprise
+
+
+Uninstall MongoDB
+=========
+
+sudo systemctl stop mongod
+sudo yum -y erase $(rpm -qa | grep mongodb-enterprise)
+sudo rm -rf /var/log/mongodb/*
+sudo rm -rf /var/lib/mongodb/*
+sudo rm -rf /var/run/mongodb/mongod.pid
+sudo systemctl daemon-reload
+ps -ef | grep mongod.conf 
+
+
+
+Uninstall MongoDB
+=========
+
+# Create default AWS instances and build AMI
+. Input replset name 
+. Compose the instance / volume tags for the members
+. Install mongodb on all three 
+. Create replicaset  
+. Take AMI snapshot
+
+# Create 
+
 # mongodb
 
 ## Steps
@@ -66,4 +105,40 @@ dfwpublicIGW
 
 dfwpublicvpc -> route table : edit add 0.0.0.0/0 -> IGW 
 dfwprivatevpc -> route table : 
+
+
+
+intention is to have new servers spin up when something go down 
+
+auto scaling group name: prod.aviva.democluster.shard1
+
+may be fetch all the members of the auto scaling group 
+for each member in asg, check if tags are set 
+if set, do nothing 
+if not set, set the tags - 
+
+objective is to set the cname and zone.
+zone could be set at asg level 
+cname should have prefix + server# 
+
+asgn: prod.aviva.democluster.shard1
+server prefix: prod.adc
+server #: shard11
+cname: prod.adc.shard11.avivadental.care.
+
+given current : [i2,i3,i4]
+got metrics for all []
+
+maintain a collection of instances for replicaset from asg 
+prod.aviva.democluster.shard1 : [i2,i3,i5]
+
+i5 is not in DynamoDB, take the role of i4 
+what if there are two, so lowcase sort and pick the ith replacement 
+take the mappings from i4, cname, zone etc and put it back on i5 
+kayka
+
+now how about unmounting back the drives onto i5 
+find the volumes by the tags and force detach and attach 
+# invoke something on the i5 the updates the fstab, mounts data points etc 
+
 

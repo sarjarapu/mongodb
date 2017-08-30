@@ -1,0 +1,29 @@
+---
+- name: add epel yum repository
+  become: true
+  yum_repository:
+    name: epel
+    description: epel yum repository
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+    metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch
+    enabled: yes
+    gpgcheck: no
+    state: present
+
+- name: install pip via easy_install
+  become: true
+  easy_install:
+    name: pip
+    state: latest
+
+- name: install additional packages required 
+  become: true
+  yum: 
+    name: "{{item}}"
+    state: present
+  with_items:
+    - epel-release
+    - ansible
+
+- name: install python packages via pip
+  shell: /usr/bin/pip install awscli --upgrade --user

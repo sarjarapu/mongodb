@@ -1,0 +1,6 @@
+---
+- name: install mongo and utils
+  hosts: default
+  roles:
+    - role: mongo
+    - role: utilities

@@ -1,0 +1,12 @@
+---
+- name: provision aws instances for mongodb
+  hosts: local
+  tasks:
+    - include_role:
+        name: aws
+      with_items:
+        - '01'
+        - '02'
+        - '03'
+      loop_control:
+        loop_var: server_number

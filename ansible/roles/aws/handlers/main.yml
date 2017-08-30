@@ -1,0 +1,9 @@
+---
+- name: wait for ssh
+  wait_for:
+    host: "{{ inventory_hostname }}"
+    port: 22
+    delay: 10
+    timeout: 300
+    state: started
+  connection: local

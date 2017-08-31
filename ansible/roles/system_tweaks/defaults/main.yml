@@ -1,0 +1,5 @@
+---
+swap_device: "/dev/xvdf"
+app_mount_path: "/data"
+data_folder: "{{app_mount_path}}/mongodb"
+log_path: "{{app_mount_path}}/log/mongodb"

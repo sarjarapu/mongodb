@@ -56,7 +56,7 @@
       dest: "inventories/{{server_group_name}}"
       regexp: "^{{ create_output.instances.0.public_dns_name }}"
       insertafter: "rs_servers"
-      line: "{{ create_output.instances.0.public_dns_name }}"
+      line: "{{ create_output.instances.0.public_dns_name }} private_dns={{create_output.instances.0.private_dns_name}} bind_ip={{create_output.instances.0.private_ip}}"
       state: present
       create: True
 

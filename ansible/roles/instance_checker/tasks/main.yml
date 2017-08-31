@@ -1,0 +1,14 @@
+---
+- name: find the current servers ip address
+  vars:
+    - ipaddress: "{{ansible_default_ipv4.address}}"
+    - private_key_file: "/home/ec2-user/.ssh/amazonaws_rsa"
+  ec2_facts:
+    region: "{{ region }}"
+    filters:
+      instance-state-name: running
+      private_ip: "{{ ipaddress }}"
+  register: instance_check
+
+- name: print instance_check.instances.0 after checking
+  debug: msg="instance [{{ instance_check.instances.0 | default('NA') }}]"

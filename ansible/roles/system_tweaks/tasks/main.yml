@@ -1,0 +1,110 @@
+---
+
+- name: install xfsprogs and xfsdump
+  yum: 
+    name: "{{item}}"
+    state: present
+  with_items:
+    - xfsprogs
+    - xfsdump
+    - curl
+  become: true
+
+- name: disable selinux
+  become: true
+  selinux:
+    state: disabled
+    policy: targeted
+
+- name: turn off the swap if already exists
+  become: true
+  command: swapoff -a
+  ignore_errors: yes 
+
+- name: setup swap
+  become: true
+  command: mkswap -f  "{{swap_device}}"
+
+- name: create swap
+  become: true
+  command: swapon  "{{swap_device}}"
+
+- name: add {{swap_device}} entry in /etc/fstab; ansible module mount doesnt work!
+  become: true
+  lineinfile:
+    path: /etc/fstab
+    line: "{{swap_device}} none swap sw 0 0"
+    state: present
+
+
+- name: check if {{ app_mount_path }} folder already exists
+  stat: 
+    path: "{{ app_mount_path }}"
+  register: check_folder
+
+# NOTES: should you need to rerun
+# sudo rm -rf /data/* && sudo umount /dev/xvdb && sudo rm -rf /data
+## sudo rm -rf /data/mongodb/db/* /etc/mongod.conf
+
+- block:
+  - name: format /dev/xvdb volume as XFS
+    become: true
+    filesystem:
+      fstype: xfs
+      dev: /dev/xvdb
+      force: False
+      # CAUTION: never use force: True, unless you know what you are doing 
+
+  - name: create {{ app_mount_path }} folder at root
+    become: true
+    file:
+      state: directory
+      path: "{{ app_mount_path }}"
+      mode: 0755
+
+  - name: mount the device /dev/xvdb as data
+    become: true
+    mount:
+      path: "{{ app_mount_path }}"
+      src: /dev/xvdb
+      fstype: xfs
+      opts: noatime
+      state: mounted
+
+  - name: set {{ app_mount_path }} permissions to ec2user
+    become: true
+    file:
+      path: "{{ app_mount_path }}"
+      state: directory
+      owner: ec2-user
+      group: ec2-user
+      mode: 0755
+  
+  when: check_folder.stat.exists == False
+
+
+- name: check if {{ data_folder }}/db folder already exists
+  stat: 
+    path: "{{ data_folder }}/db"
+  register: check_folder_db
+
+- name: create the {{ log_path }}, {{ data_folder }}/db and {{ data_folder }}/private folders
+  become: true
+  file: 
+    path: "{{ item }}"
+    state: directory
+    owner: mongod
+    group: mongod
+    mode: 0755
+  with_items:
+    - "{{ log_path }}"
+    - "{{ data_folder }}"
+    - "{{ data_folder }}/db"
+  when: check_folder_db.stat.exists == False
+
+- name: start mongod service
+  become: true
+  service:
+    name: mongod
+    state: started
+    enabled: yes

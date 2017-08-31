@@ -26,15 +26,6 @@
     dest: "{{mongod_config_path}}"
     mode: 0644
 
-- name: create the /var/lib/mongodb folders
-  become: true
-  file: 
-    path: "{{data_folder}}"
-    state: directory
-    owner: mongod
-    group: mongod
-    mode: 0755
-
 - name: stop mongod service
   become: true
   service:
@@ -59,10 +50,3 @@
   with_items:
     - /var/lib/mongodb/mongod.lock
     - /var/run/mongodb/mongod.pid
-
-- name: start mongod service
-  become: true
-  service:
-    name: mongod
-    state: started
-    enabled: yes

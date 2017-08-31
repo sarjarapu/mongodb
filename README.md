@@ -35,7 +35,55 @@ Uninstall MongoDB
 . Create replicaset  
 . Take AMI snapshot
 
-# Create 
+TODO: 
+Update the instance to format the drive
+mount the devices etc 
+
+Instances:
+Kills skamon_demoapp_rs03
+Instance ID: i-0c985b5fa4f3e507a
+Instance state: terminated
+
+Auto scaling groups:
+asg_skamon_demoapp_rs
+
+Activity History
+Terminating EC2 instance: i-0c985b5fa4f3e507a
+Launching a new EC2 instance: i-0592e19d6ff99d7a5
+
+Tags on i-0c985b5fa4f3e507a
+Name	skamon_demoapp_rs03
+aws:autoscaling:groupName	asg_skamon_demoapp_rs
+expire-on	2017-09-30
+owner	shyam.arjarapu
+server_group_name	skamon_demoapp_rs
+server_number	03
+
+apply tags from terminated instance onto the new instance
+
+attache the volumes of the old instances
+Tags: 
+instance_name	skamon_demoapp_rs03
+device	/dev/xvdf
+
+ansible / cli scripts needed
+Stop mongod 
+force unmount if applicable 
+assign the ebs volumes to new server 
+mount the volumes to server 
+update the fstab 
+Copy tags from old to new server 
+start mongod 
+
+
+# Instance State 
+running
+shutting-down
+terminated
+
+# Status Checks
+Initializing
+2/2 checks passed
 
 # mongodb
 

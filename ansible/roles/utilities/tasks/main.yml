@@ -26,4 +26,17 @@
     - ansible
 
 - name: install python packages via pip
-  shell: /usr/bin/pip install awscli --upgrade --user
+  shell: /usr/bin/pip install {{item}} --upgrade --user
+  with_items:
+    - awscli
+    - virtualenv
+    - boto
+
+- name: copy the aws private key (o.O)
+  become: true
+  copy:
+    src: "/Users/shyamarjarapu/.ssh/amazonaws_rsa"
+    dest: "/home/ec2-user/.ssh/amazonaws_rsa"
+    owner: ec2-user
+    group: ec2-user
+    mode: 0400

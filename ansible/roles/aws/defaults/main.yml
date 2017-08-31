@@ -13,11 +13,6 @@ tag_owner: "shyam.arjarapu"
 instance_name: "{{ group_name }}_{{ app_name }}_{{replset_prefix}}{{ server_number }}"
 server_group_name: "{{ group_name}}_{{ app_name }}_{{replset_prefix}}"
 
-
-##################
-# IMPORTANT:
-##################
-# office us-west-2c
 region: "us-west-2"
 security_key: "ska-play"
 security_group: "ska-sg-aws"
@@ -28,6 +23,3 @@ availability_zone: "{{ region }}c"
 create_data_folder: True
 data_folder: "/app/mongodb"
 swap_location: /etc/xvdf
-
-# ami instances 
-# redhat_ami: "ami-9fa343e7" # us-west-2

@@ -31,6 +31,7 @@
     - awscli
     - virtualenv
     - boto
+    - boto3
 
 - name: copy the aws private key (o.O)
   become: true

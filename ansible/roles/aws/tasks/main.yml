@@ -26,6 +26,8 @@
         "expire-on": "{{ tag_expireon }}"
         "server_group_name": "{{server_group_name}}"
         "server_number": "{{ server_number }}"
+        "ZONE": "{{ fqdn_domain }}."
+        "CNAME": "{{ fqdn }}."
       count: 1
       volumes:
         - device_name: /dev/sda1
@@ -79,5 +81,7 @@
         "instance_name": "{{ instance_name }}"
         "server_number": "{{ server_number }}"
         "device": "{{ item.attachment_set.device }}"
+        "ZONE": "{{ fqdn_domain }}."
+        "CNAME": "{{ fqdn }}."
     with_items: "{{ volumes_output.volumes }}"
   when: instance_check.instances.0 is undefined

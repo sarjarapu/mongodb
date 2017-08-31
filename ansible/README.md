@@ -28,11 +28,11 @@ keep things simple - lambda, may be route 53 out
 figure out better way to assign fqdn .uswest is fine
 so whenever something new kicks in. it needs to take the fqdn of what went down
 may be have script running on crontab for every 1 min
-	. it checks if the device has /data mapping
-	. if it has exit. if not fetch the instance id 
-	. find the auto scaling group that has current instance_id
-	. find all the instance ids of the auto scaling group
-	. find the server_group_name and server_number from tags (Who populates these tags for you?)
+	* it checks if the device has /data mapping
+	* if it has exit. if not fetch the instance id 
+	* find the auto scaling group that has current instance_id
+	* find all the instance ids of the auto scaling group
+	* find the server_group_name and server_number from tags (Who populates these tags for you?)
 	. if they are blank exit. if not query for volumes by above combo
 	. if not found exit. if found, force detach and attach to current instance (remember the order)
 	. update fstab if required, i dont think you do
@@ -54,14 +54,30 @@ DynamoDB or MongoDB - for reading from db
 curl http://169.254.169.254/latest/meta-data/
 http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
 
+ami_skamon_demoapp_rs
+lc_skamon_demoapp_rs
+asg_skamon_demoapp_rs
+
+	
+pending
+Unhealthy
 
 License
 -------
 
-[ ] Add ZONE and CNAME tags to server and volumes.
+[x] Add ZONE and CNAME tags to server and volumes.
+[x] Check if the device has /data mapping
+[x] if it has exit. if not fetch the instance id
+[x] find instance tags: auto_scaling_group, server_group_name and server_number
+[x] Optional: find the all the instance ids of the above auto scaling group
+[x] find the server_group_name and server_number from tags
+[x] if they are blank exit. if not query for volumes by above combo
+[ ] if not found exit. if found, force detach and attach to current instance (remember the order)
+[ ] update fstab if required, i dont think you do
+[ ] create the folder and mount the devices 
+[ ] restart the mongod
 [ ] Ansible to run logic, ship to image when deploying
 [ ] Crontab to invoke playbook
-[ ] 
 
 https://stackoverflow.com/questions/35133299/launch-a-shell-script-from-lambda-in-aws
 Security. As of today lambda can't run in VPC. Which means your EC2 has to have a wide open inbound security group.

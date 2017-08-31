@@ -6,12 +6,14 @@ data_vol_size: 30
 group_name: "skamon"
 app_name: "demoapp"
 replset_prefix: "rs"
-server_number: '01'
+server_number: "01"
 ssh_user: "ec2-user"
 tag_owner: "shyam.arjarapu"
+fqdn_domain: "respawn.internal"
 
 instance_name: "{{ group_name }}_{{ app_name }}_{{replset_prefix}}{{ server_number }}"
 server_group_name: "{{ group_name}}_{{ app_name }}_{{replset_prefix}}"
+fqdn: "{{instance_name}}.{{ fqdn_domain }}"
 
 region: "us-west-2"
 security_key: "ska-play"

@@ -1,4 +1,7 @@
 [rs_servers]
+ec2-54-202-104-86.us-west-2.compute.amazonaws.com private_dns=ip-172-31-9-102.us-west-2.compute.internal bind_ip=172.31.9.102
+ec2-34-209-219-57.us-west-2.compute.amazonaws.com private_dns=ip-172-31-15-239.us-west-2.compute.internal bind_ip=172.31.15.239
+ec2-34-211-150-89.us-west-2.compute.amazonaws.com private_dns=ip-172-31-12-22.us-west-2.compute.internal bind_ip=172.31.12.22
 ec2-54-201-205-208.us-west-2.compute.amazonaws.com private_dns=ip-172-31-0-119.us-west-2.compute.internal bind_ip=172.31.0.119
 ec2-34-212-169-20.us-west-2.compute.amazonaws.com private_dns=ip-172-31-4-85.us-west-2.compute.internal bind_ip=172.31.4.85
 ec2-34-211-145-77.us-west-2.compute.amazonaws.com private_dns=ip-172-31-1-239.us-west-2.compute.internal bind_ip=172.31.1.239

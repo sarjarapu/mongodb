@@ -4,21 +4,20 @@
   hosts: rs_servers
   gather_facts: no
   roles:
-#     - role: mongo
-#       mongo_version: "3.2.12"
-#     - role: system_tweaks
-    - role: utilities
+    - role: mongo
+      mongo_version: "3.2.12"
+    - role: system_tweaks
 
-# - name: "create replicaset: {{replset_name}}"
-#   hosts: "rs_servers[0]"
-#   gather_facts: no
-#   vars:
-#     members: 
-#         - { "private_dns": "{{hostvars[groups.rs_servers[0]].private_dns}}", "mongo_port" : "{{mongo_port}}" }
-#         - { "private_dns": "{{hostvars[groups.rs_servers[1]].private_dns}}", "mongo_port" : "{{mongo_port}}" }
-#         - { "private_dns": "{{hostvars[groups.rs_servers[2]].private_dns}}", "mongo_port" : "{{mongo_port}}" }
-#   tasks:
-#     - include_role:
-#         name: mongo
-#         tasks_from: "initiate.replicaset"
-##     - debug: msg="{{hostvars[groups.rs_servers[0]].inventory_hostname}} => {{hostvars[groups.rs_servers[0]].private_dns | default(hostvars[groups.rs_servers[0]].inventory_hostname)}} => {{hostvars[groups.rs_servers[0]].bind_ip | default('0.0.0.0')}} => ipv4.address {{hostvars[groups.rs_servers[0]]['ansible_eth0']['ipv4']['address']}}"
+- name: "create replicaset: {{replset_name}}"
+  hosts: "rs_servers[0]"
+  gather_facts: no
+  vars:
+    members: 
+        - { "private_dns": "{{hostvars[groups.rs_servers[0]].private_dns}}", "mongo_port" : "{{mongo_port}}" }
+        - { "private_dns": "{{hostvars[groups.rs_servers[1]].private_dns}}", "mongo_port" : "{{mongo_port}}" }
+        - { "private_dns": "{{hostvars[groups.rs_servers[2]].private_dns}}", "mongo_port" : "{{mongo_port}}" }
+  tasks:
+    - include_role:
+        name: mongo
+        tasks_from: "initiate.replicaset"
+#     - debug: msg="{{hostvars[groups.rs_servers[0]].inventory_hostname}} => {{hostvars[groups.rs_servers[0]].private_dns | default(hostvars[groups.rs_servers[0]].inventory_hostname)}} => {{hostvars[groups.rs_servers[0]].bind_ip | default('0.0.0.0')}} => ipv4.address {{hostvars[groups.rs_servers[0]]['ansible_eth0']['ipv4']['address']}}"

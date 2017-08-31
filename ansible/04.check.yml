@@ -1,7 +1,6 @@
 ---
 - name: provision aws instances for mongodb
-#  hosts: local
-  hosts: rs_servers
+  hosts: local
   roles:
     - role: instance_checker
 

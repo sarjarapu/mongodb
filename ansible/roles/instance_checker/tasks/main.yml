@@ -1,14 +1,85 @@
 ---
-- name: find the current servers ip address
-  vars:
-    - ipaddress: "{{ansible_default_ipv4.address}}"
-    - private_key_file: "/home/ec2-user/.ssh/amazonaws_rsa"
-  ec2_facts:
-    region: "{{ region }}"
-    filters:
-      instance-state-name: running
-      private_ip: "{{ ipaddress }}"
-  register: instance_check
 
-- name: print instance_check.instances.0 after checking
-  debug: msg="instance [{{ instance_check.instances.0 | default('NA') }}]"
+- name: check if {{ app_mount_path }} folder already exists
+  stat: 
+    path: "{{ app_mount_path }}"
+  register: check_folder
+
+
+- block: 
+    ## app_mount_path folder does not exists. 
+    - name: server does not have {{ app_mount_path }}; fetching mounts from elsewhere
+      debug: msg="instance ipv4 [{{ansible_default_ipv4.address}}]"
+
+    - name: get the aws instance from ip address
+      vars:
+        #- ip_address: "{{ ansible_default_ipv4.address }}"
+        # - ip_address: "172.31.0.119" # existing instance
+        - ip_address: "172.31.2.176" # new instance
+      ec2_remote_facts:
+        region: "{{ region }}"
+        filters:
+          instance-state-name: running
+          private_ip_address: "{{ ip_address }}"
+      register: instance_check
+
+    - block: 
+      ## current instance id is found in AWS
+      - name: found an aws instance by private_ip_address 
+        debug: msg="instance [{{ instance_check.instances.0 }}] "
+
+      - block: 
+        ## aws:autoscaling:groupName tag is defined on current instance 
+        ## If the above tag is defined, I am assuming the current instance is part of the group 
+
+        - name: found tag aws:autoscaling:groupName; fetch auto scaling group by name
+          ec2_asg_facts:
+            name: "{{ instance_check.instances.0.tags['aws:autoscaling:groupName'] }}"
+          register: auto_scaling_group
+          
+        # - block:
+        #   ## auto_scaling_group tag is found. use to confirm current instance id is still part
+        #   ## 
+        #     - name: print auto scaling group details
+        #       debug: msg="auto scaling group [{{ auto_scaling_group }}] "
+
+        #   when: auto_scaling_group.results.0 is defined
+
+        - name: retrieve /dev/xvdb volume volume by availability and tags
+          ec2_vol_facts:
+            region: "{{ region }}"
+            filters:
+              "status": "available"
+              "tag:server_group_name": "{{ instance_check.instances.0.tags.server_group_name }}"
+              "tag:device": "/dev/xvdb"
+          register: available_volumes
+
+        - block:
+          ## volume for the /dev/xvdb is found. 
+
+          - name: found /dev/xvdb volume; display the volume
+            debug: msg="{{available_volumes.0}}"
+
+          - name: mount the /dev/xvdb volume to current instance
+            debug: msg="{{instance_check.instances.0.id}} {{available_volumes.0.id}} /dev/xvdb "
+            # ec2_vol:
+            #   instance: "{{instance_check.instances.0.id}}"
+            #   id: "{{available_volumes.0.id}}"
+            #   device_name: /dev/sdf
+            #   delete_on_termination: yes
+
+          when: available_volumes.0 is defined 
+
+        # - name: Retrieve all tags on an instance
+        #   vars:
+        #     - server_group_name: "{{ instance_check.instances.0.tags.server_group_name }}"
+        #     - server_number: "{{ instance_check.instances.0.tags.server_number }}"
+        #   debug: msg="instance [{{ server_group_name }} {{ server_number }}] "
+
+        when: instance_check.instances.0.tags['aws:autoscaling:groupName'] is defined 
+
+      when: instance_check.instances.0 is defined
+
+  when: check_folder.stat.exists == False
+
+

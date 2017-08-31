@@ -1,0 +1,7 @@
+---  
+
+- name: install the utilities or tools
+  hosts: rs_servers
+  gather_facts: no
+  roles:
+    - role: utilities

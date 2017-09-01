@@ -28,6 +28,7 @@
         "server_number": "{{ server_number }}"
         "ZONE": "{{ fqdn_domain }}."
         "CNAME": "{{ fqdn }}."
+        "FQDN": "{{ fqdn }}"
       count: 1
       volumes:
         - device_name: /dev/sda1
@@ -58,7 +59,7 @@
       dest: "inventories/{{server_group_name}}"
       regexp: "^{{ create_output.instances.0.public_dns_name }}"
       insertafter: "rs_servers"
-      line: "{{ create_output.instances.0.public_dns_name }} private_dns={{create_output.instances.0.private_dns_name}} bind_ip={{create_output.instances.0.private_ip}}"
+      line: "{{ create_output.instances.0.public_dns_name }} private_dns={{create_output.instances.0.private_dns_name}} bind_ip={{create_output.instances.0.private_ip}} fqdn={{fqdn}}"
       state: present
       create: True
 
@@ -82,6 +83,7 @@
         "server_number": "{{ server_number }}"
         "device": "{{ item.attachment_set.device }}"
         "ZONE": "{{ fqdn_domain }}."
+        "FQDN": "{{ fqdn }}"
         "CNAME": "{{ fqdn }}."
     with_items: "{{ volumes_output.volumes }}"
   when: instance_check.instances.0 is undefined

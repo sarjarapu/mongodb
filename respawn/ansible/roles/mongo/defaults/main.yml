@@ -10,3 +10,4 @@ log_path: "{{app_mount_path}}/log/mongodb"
 mongod_config_path: "/etc/mongod.conf"
 bind_ip: "0.0.0.0"
 shard_role: ""
+use_fqdn: True

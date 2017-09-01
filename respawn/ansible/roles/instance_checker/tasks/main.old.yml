@@ -1,0 +1,254 @@
+---
+# TODO: Force make the current check fail 
+- name: check if {{ data_folder }} folder already exists
+  stat: 
+    path: "{{ data_folder }}"
+  register: check_folder
+
+
+- block: 
+
+    - name: stop mongod service
+      become: true
+      service:
+        name: mongod
+        state: stopped
+        enabled: yes
+
+    - name: create {{ app_mount_path }} folder at root
+      become: true
+      file:
+        state: directory
+        path: "{{ app_mount_path }}"
+        mode: 0755
+
+    - name: found an aws instance by private_ip_address 
+      debug: msg="instance [{{ instance_id }}] "
+
+    - name: Retrieve all tags on an instance
+      ec2_tag:
+        region: '{{ region }}'
+        resource: '{{ instance_id }}'
+        state: list
+      register: ec2_tags
+          
+    - name: retrieve /dev/xvdb volume volume by availability and tags
+      ec2_vol_facts:
+        region: "{{ region }}"
+        filters:
+          # "volume_id": "vol-04f3275c39d092c0d"
+          "status": "available"
+          "tag:server_group_name": "{{ ec2_tags.tags.server_group_name }}"
+          "tag:device": "/dev/xvdb"
+      register: mongod_device_search2
+
+    - name: display the /dev/xvdb volume search result
+      debug: msg="{{mongod_device_search2.volumes.0}} "
+
+    - name: attache the volume_id {{mongod_device_search2.volumes.0.id}} to instance_id {{ instance_id }}
+      ec2_vol:
+        region: "{{ region }}"
+        instance: "{{ instance_id }}"
+        id: "{{mongod_device_search2.volumes.0.id}}"
+        device_name: /dev/xvdb
+        delete_on_termination: no
+
+    - name: mount the mongod device /dev/xvdb to {{ app_mount_path }}
+      become: true
+      mount:
+        src: /dev/xvdb
+        path: "{{ app_mount_path }}"
+        fstype: xfs
+        opts: noatime
+        state: mounted
+        
+    - name: add fstab entry /dev/xvdb
+      become: true
+      mount:
+        src: /dev/xvdb
+        path: "{{ app_mount_path }}"
+        fstype: xfs
+        opts: noatime
+        state: present
+
+
+    - name: update the tags on instance id = [{{ instance_id }}]
+      ec2_tag:
+        region: "{{ region }}" 
+        resource: "{{ instance_id }}"
+        tags:
+          "Name": "{{ mongod_device_search2.volumes.0.tags['instance_name'] }}"
+          "owner": "{{ mongod_device_search2.volumes.0.tags['owner'] }}"
+          "expire-on": "{{ mongod_device_search2.volumes.0.tags['expire-on'] }}"
+          "server_group_name": "{{ mongod_device_search2.volumes.0.tags['server_group_name'] }}"
+          "server_number": "{{ mongod_device_search2.volumes.0.tags['server_number'] }}"
+          "ZONE": "{{ mongod_device_search2.volumes.0.tags['ZONE'] }}"
+          "CNAME": "{{ mongod_device_search2.volumes.0.tags['CNAME'] }}"
+
+    # - block: 
+    #   ## current instance id is found in AWS
+    #   - name: found an aws instance by private_ip_address 
+    #     debug: msg="instance [{{ instance_check.instances.0 }}] "
+
+    #   - name: retrieve /dev/xvdb volume volume by availability and tags
+    #     ec2_vol_facts:
+    #       region: "{{ region }}"
+    #       filters:
+    #         "volume_id": "vol-04f3275c39d092c0d"
+    #     register: mongod_device_search2
+
+    #   - name: display the /dev/xvdb volume search result
+    #     debug: msg="{{mongod_device_search2.volumes.0.tags['expire-on']}} "
+
+    #   - name: update the tags on instance id = [{{ instance_id }}]
+    #     ec2_tag:
+    #       region: "{{ region }}" 
+    #       resource: "{{ instance_id }}"
+    #       tags:
+    #         "Name": "{{ mongod_device_search2.volumes.0.tags['instance_name'] }}"
+    #         "owner": "{{ mongod_device_search2.volumes.0.tags['owner'] }}"
+    #         "expire-on": "{{ mongod_device_search2.volumes.0.tags['expire-on'] }}"
+    #         "server_group_name": "{{ mongod_device_search2.volumes.0.tags['server_group_name'] }}"
+    #         "server_number": "{{ mongod_device_search2.volumes.0.tags['server_number'] }}"
+    #         "ZONE": "{{ mongod_device_search2.volumes.0.tags['ZONE'] }}"
+    #         "CNAME": "{{ mongod_device_search2.volumes.0.tags['CNAME'] }}"
+
+
+    #   # - block: 
+    #   #   ## aws:autoscaling:groupName tag is defined on current instance 
+    #   #   ## If the above tag is defined, I am assuming the current instance is part of the group 
+
+    #   #   # - name: found tag aws:autoscaling:groupName; fetch auto scaling group by name
+    #   #   #   ec2_asg_facts:
+    #   #   #     name: "{{ instance_check.instances.0.tags['aws:autoscaling:groupName'] }}"
+    #   #   #   register: auto_scaling_group
+          
+    #   #   # - block:
+    #   #   #   ## auto_scaling_group tag is found. use to confirm current instance id is still part
+    #   #   #   ## 
+    #   #   #     - name: print auto scaling group details
+    #   #   #       debug: msg="auto scaling group [{{ auto_scaling_group }}] "
+    #   #   #   when: auto_scaling_group.results.0 is defined
+
+    #   #   ### "{{aws_access_key_id}} {{aws_secret_access_key}}"
+        
+    #   #   ## Needs to be on the remote server. context=local for now
+    #   #   # stop the mongod 
+    #   #   # - name: stop mongod service
+    #   #   #   become: true
+    #   #   #   service:
+    #   #   #     name: mongod
+    #   #   #     state: stopped
+    #   #   #     enabled: yes
+
+    #   #   # - name: detach existing /dev/xvdb device
+    #   #   #   vars:
+    #   #   #     mongod_device: "{{ instance_check.instances.0.block_device_mapping | selectattr('device_name', 'equalto', '/dev/xvdb') | first }}"
+    #   #   #   ec2_vol:
+    #   #   #     region: "{{ region }}"
+    #   #   #     id: "{{ mongod_device.volume_id }}"
+    #   #   #     instance: None
+
+    #   #   # - name: detach existing /dev/xvdf device
+    #   #   #   vars:
+    #   #   #     swap_device: "{{ instance_check.instances.0.block_device_mapping | selectattr('device_name', 'equalto', '/dev/xvdf') | first }}"
+    #   #   #   ec2_vol:
+    #   #   #     region: "{{ region }}"
+    #   #   #     id: "{{ swap_device.volume_id }}"
+    #   #   #     instance: None
+
+
+
+    #   #   # - name: retrieve /dev/xvdb volume volume by availability and tags
+    #   #   #   ec2_vol_facts:
+    #   #   #     region: "{{ region }}"
+    #   #   #     filters:
+    #   #   #       "status": "available"
+    #   #   #       "tag:server_group_name": "{{ instance_check.instances.0.tags.server_group_name }}"
+    #   #   #       "tag:device": "/dev/xvdb"
+    #   #   #   register: mongod_device_search
+
+    #   #   # - name: display the /dev/xvdb volume search result
+    #   #   #   debug: msg="{{mongod_device_search.volumes}} "
+
+    #   #   # # ## volume for the /dev/xvdb is found. 
+    #   #   # # - name: mount the /dev/xvdb volume to current instance
+    #   #   # #   ec2_vol:
+    #   #   # #     region: "{{ region }}"
+    #   #   # #     instance: "{{instance_id}}"
+    #   #   # #     id: "{{mongod_device_search.volumes.0.id}}"
+    #   #   # #     device_name: /dev/xvdb
+    #   #   # #     delete_on_termination: false
+    #   #   # #   when: mongod_device_search.volumes.0 is defined 
+
+
+    #   #   # - name: retrieve /dev/xvdf volume volume by availability and tags
+    #   #   #   ec2_vol_facts:
+    #   #   #     region: "{{ region }}"
+    #   #   #     filters:
+    #   #   #       "status": "available"
+    #   #   #       "tag:server_group_name": "{{ instance_check.instances.0.tags.server_group_name }}"
+    #   #   #       "tag:device": "/dev/xvdf"
+    #   #   #   register: swap_device_search
+
+    #   #   # - name: display the /dev/xvdf volume search result
+    #   #   #   debug: msg="{{swap_device_search.volumes}} "
+
+    #   #   # # ## volume for the /dev/xvdf is found. 
+    #   #   # # - name: mount the /dev/xvdf volume to current instance
+    #   #   # #   ec2_vol:
+    #   #   # #     region: "{{ region }}"
+    #   #   # #     instance: "{{instance_id}}"
+    #   #   # #     id: "{{swap_device_search.volumes.0.id}}"
+    #   #   # #     device_name: /dev/xvdf
+    #   #   # #     delete_on_termination: false
+    #   #   # #   when: swap_device_search.volumes.0 is defined 
+          
+
+    #   #   # ## Needs to be on the remote server. context=local for now
+    #   #   # - name: start mongod service
+    #   #   #   become: true
+    #   #   #   service:
+    #   #   #     name: mongod
+    #   #   #     state: started
+    #   #   #     enabled: yes
+
+
+    #   #   - name: retrieve /dev/xvdb volume volume by availability and tags
+    #   #     ec2_vol_facts:
+    #   #       region: "{{ region }}"
+    #   #       filters:
+    #   #         "volume_id": "vol-04f3275c39d092c0d"
+    #   #     register: mongod_device_search2
+
+    #   #   - name: display the /dev/xvdb volume search result
+    #   #     debug: msg="{{mongod_device_search2.volumes.0.tags['expire-on']}} "
+
+    #   #   - name: update the tags on instance id = [{{ instance_id }}]
+    #   #     ec2_tag:
+    #   #       region: "{{ region }}" 
+    #   #       resource: "{{ instance_id }}"
+    #   #       tags:
+    #   #         "Name": "{{ mongod_device_search2.volumes.0.tags['instance_name'] }}"
+    #   #         "owner": "{{ mongod_device_search2.volumes.0.tags['owner'] }}"
+    #   #         "expire-on": "{{ mongod_device_search2.volumes.0.tags['expire-on'] }}"
+    #   #         "server_group_name": "{{ mongod_device_search2.volumes.0.tags['server_group_name'] }}"
+    #   #         "server_number": "{{ mongod_device_search2.volumes.0.tags['server_number'] }}"
+    #   #         "ZONE": "{{ mongod_device_search2.volumes.0.tags['ZONE'] }}"
+    #   #         "CNAME": "{{ mongod_device_search2.volumes.0.tags['CNAME'] }}"
+
+    #   #   # grab the tags from the volume and apply onto the instance id
+    #   #   # - name: Retrieve all tags on an instance
+    #   #   #   vars:
+    #   #   #     - server_group_name: "{{ instance_check.instances.0.tags.server_group_name }}"
+    #   #   #     - server_number: "{{ instance_check.instances.0.tags.server_number }}"
+    #   #   #   debug: msg="instance [{{ server_group_name }} {{ server_number }}] "
+
+    #   #   # when: instance_check.instances.0.tags['aws:autoscaling:groupName'] is defined 
+
+
+    #   when: instance_check.instances.0 is defined
+
+  when: check_folder.stat.exists == False
+
+

@@ -1,6 +1,12 @@
 ---
 - name: display the primary hostname, replicaset name, mongo port and members
   debug: msg="inventory_hostname [{{inventory_hostname}}], replicaset [{{replset_name}}], mongo_port [{{mongo_port}}] members [{{members}}]"
-
-- name: initiate replica set with all the members and wait 5 sec
+  
+- name: initiate replica set using private_dns for all the members and wait 5 sec
   shell: "mongo admin --host {{members[0].private_dns}} --port {{members[0].mongo_port}} --eval 'rs.initiate({_id: \"{{replset_name}}\", members: [{_id:0, host: \"{{members[0].private_dns}}:{{members[0].mongo_port}}\"}, {_id:1, host: \"{{members[1].private_dns}}:{{members[1].mongo_port}}\"}, {_id:2, host: \"{{members[2].private_dns}}:{{members[2].mongo_port}}\"} ]});sleep(5000);'"
+  when: use_fqdn == False 
+  
+- name: initiate replica set using fqdn for all the members and wait 5 sec
+  shell: "mongo admin --host {{members[0].private_dns}} --port {{members[0].mongo_port}} --eval 'rs.initiate({_id: \"{{replset_name}}\", members: [{_id:0, host: \"{{members[0].fqdn}}:{{members[0].mongo_port}}\"}, {_id:1, host: \"{{members[1].fqdn}}:{{members[1].mongo_port}}\"}, {_id:2, host: \"{{members[2].fqdn}}:{{members[2].mongo_port}}\"} ]});sleep(5000);'"
+  when: use_fqdn == True 
+  

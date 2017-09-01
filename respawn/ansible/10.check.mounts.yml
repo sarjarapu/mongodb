@@ -1,6 +1,14 @@
 ---
-- name: provision aws instances for mongodb
-  hosts: local
+
+- name: collecting the instance facts
+  hosts: "ec2-54-202-231-190.us-west-2.compute.amazonaws.com"
+  tasks:
+    - ec2_facts:
+      register: current_instance
+
+- name: perform checks to ensure all devices are mounted
+  hosts: "ec2-54-202-231-190.us-west-2.compute.amazonaws.com"
+  vars:
+    - instance_id: "{{current_instance.ansible_facts.ansible_ec2_instance_id}}"
   roles:
     - role: instance_checker
-

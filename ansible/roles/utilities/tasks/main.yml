@@ -41,3 +41,15 @@
     owner: ec2-user
     group: ec2-user
     mode: 0400
+
+- name: copy the aws config and credentials
+  become: true
+  copy:
+    src: "{{item}}"
+    dest: "/home/ec2-user/.aws/{{item}}"
+    owner: ec2-user
+    group: ec2-user
+    mode: 0400
+  with_items:
+    - config
+    - credentials

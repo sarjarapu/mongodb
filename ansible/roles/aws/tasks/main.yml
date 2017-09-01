@@ -85,3 +85,4 @@
         "CNAME": "{{ fqdn }}."
     with_items: "{{ volumes_output.volumes }}"
   when: instance_check.instances.0 is undefined
+

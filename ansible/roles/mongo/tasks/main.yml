@@ -32,21 +32,14 @@
     name: mongod
     state: stopped
     enabled: yes
-    
-- name: disable selinux
-  become: true
-  selinux:
-    state: disabled
-    policy: targeted
 
 - name: remove any lock, pid files folders
   become: true
   file: 
     path: "{{item}}"
     state: absent
-    owner: mongod
-    group: mongod
-    mode: 0755
   with_items:
     - /var/lib/mongodb/mongod.lock
     - /var/run/mongodb/mongod.pid
+    - /data
+    - "{{app_mount_path}}"

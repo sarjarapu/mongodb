@@ -1,5 +1,2 @@
 [local]
 localhost ansible_connection=local ansible_python_interpreter=python
-
-[rs_servers]
-ec2-34-212-169-20.us-west-2.compute.amazonaws.com private_dns=ip-172-31-4-85.us-west-2.compute.internal

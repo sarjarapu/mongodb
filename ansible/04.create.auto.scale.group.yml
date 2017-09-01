@@ -1,0 +1,13 @@
+---
+- name: create auto scaling group 
+  hosts: local
+  tasks:
+    - name: stop the server number 3
+      debug: msg="{{hostvars[groups.rs_servers[2]]}}"
+      # ec2:
+      #   instance_ids: '{{hostvars[groups.rs_servers[2]].instance_id}}'
+      #   region: '{{ region }}'
+      #   state: stopped
+        
+
+

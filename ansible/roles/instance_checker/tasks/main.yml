@@ -42,9 +42,9 @@
         #   ## 
         #     - name: print auto scaling group details
         #       debug: msg="auto scaling group [{{ auto_scaling_group }}] "
-
         #   when: auto_scaling_group.results.0 is defined
 
+        ### "{{aws_access_key_id}} {{aws_secret_access_key}}"
         - name: retrieve /dev/xvdb volume volume by availability and tags
           ec2_vol_facts:
             region: "{{ region }}"

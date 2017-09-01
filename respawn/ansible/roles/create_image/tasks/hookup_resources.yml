@@ -1,0 +1,34 @@
+---
+
+
+- name: collecting the instance facts
+  ec2_facts:
+  register: current_instance
+
+- name: print the server name
+  debug: msg="{{current_instance.ansible_facts.ansible_ec2_instance_id}}"
+
+- name: add fstab entry /dev/xvdb
+  become: true
+  mount:
+    src: /dev/xvdb
+    path: "{{ app_mount_path }}"
+    fstype: xfs
+    opts: noatime
+    state: present
+
+- name: mount the mongod device /dev/xvdb
+  become: true
+  mount:
+    src: /dev/xvdb
+    path: "{{ app_mount_path }}"
+    fstype: xfs
+    opts: noatime
+    state: mounted
+
+- name: start mongod service
+  become: true
+  service:
+    name: mongod
+    state: started
+    enabled: yes

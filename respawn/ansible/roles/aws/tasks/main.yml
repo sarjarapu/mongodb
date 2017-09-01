@@ -42,7 +42,7 @@
         - device_name: /dev/xvdf
           volume_type: gp2
           volume_size: 4
-          delete_on_termination: false
+          delete_on_termination: true
           when: create_data_folder == True
     register: create_output
 

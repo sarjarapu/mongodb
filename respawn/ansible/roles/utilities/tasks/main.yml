@@ -1,4 +1,5 @@
 ---
+
 - name: add epel yum repository
   become: true
   yum_repository:
@@ -33,8 +34,13 @@
     - boto
     - boto3
 
-- name: copy the aws private key (o.O)
-  become: true
+- name: create .aws folder at home
+  file:
+    state: directory
+    path: "/home/ec2-user/.aws"
+    mode: 0755
+
+- name: copy the aws private key
   copy:
     src: "/Users/shyamarjarapu/.ssh/amazonaws_rsa"
     dest: "/home/ec2-user/.ssh/amazonaws_rsa"
@@ -43,8 +49,7 @@
     mode: 0400
 
 - name: copy the aws config and credentials
-  become: true
-  copy:
+  template:
     src: "{{item}}"
     dest: "/home/ec2-user/.aws/{{item}}"
     owner: ec2-user

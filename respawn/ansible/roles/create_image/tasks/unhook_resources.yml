@@ -1,0 +1,30 @@
+---
+
+
+- name: collecting the instance facts
+  ec2_facts:
+  register: current_instance
+
+- name: print the server name
+  debug: msg="{{current_instance.ansible_facts.ansible_ec2_instance_id}}"
+
+- name: stop mongod service
+  become: true
+  service:
+    name: mongod
+    state: stopped
+    enabled: yes
+
+- name: unmount the mongod device /dev/xvdb
+  become: true
+  mount:
+    src: /dev/xvdb
+    path: "{{ app_mount_path }}"
+    state: unmounted
+
+- name: remove fstab entry /dev/xvdb
+  become: true
+  mount:
+    src: /dev/xvdb
+    path: "{{ app_mount_path }}"
+    state: absent

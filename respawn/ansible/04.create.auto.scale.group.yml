@@ -1,18 +1,57 @@
 ---
-- name: create auto scaling group 
-  hosts: local
-  vars:
-    - region: "us-west-2"
-  tasks:
-    - name: get the aws instance from ip address
-      ec2_remote_facts:
-        region: "{{ region }}"
-        filters:
-          private_dns_name: "{{ hostvars[groups.rs_servers[2]].private_dns }}"
-      register: instance_check
 
-    - name: display the instance details
-      debug: msg="{{ instance_check.instances.0.tags }}"
+# append the datetime maybe
+# unmound the device 
+# take snapshot tag the snapshot 
+# create ami with the above snapshot id 
+# create launch configuration
+# create auto scaling group 0,3; desired 0
+# attach servers to the group 
+# aws autoscaling attach-instances --instance-ids i-a8e09d9c --auto-scaling-group-name my-asg
+
+# - name: unhook the resources on server 3
+#   hosts: rs_servers[2]
+#   tasks:
+#   - include_role:
+#       name: create_image
+#       tasks_from: "unhook_resources"
+
+# - name: install the utilities or tools
+#   hosts: local
+#   vars:
+#     - ami_name: "ami5_skamon_demoapp_rs"
+#     - private_dns: "{{ hostvars[groups.rs_servers[2]].private_dns }}"
+#   roles:
+#     - role: create_image
+
+# - name: hookup the resources on server 3
+#   hosts: rs_servers[2]
+#   tasks:
+#   - include_role:
+#       name: create_image
+#       tasks_from: "hookup_resources"
+
+
+
+
+
+
+
+
+# - name: create auto scaling group 
+#   hosts: local
+#   vars:
+#     - region: "us-west-2"
+#   tasks:
+#     - name: get the aws instance from ip address
+#       ec2_remote_facts:
+#         region: "{{ region }}"
+#         filters:
+#           private_dns_name: "{{ hostvars[groups.rs_servers[2]].private_dns }}"
+#       register: instance_check
+
+#     - name: create an AMI on instance 
+#       debug: msg="{{ instance_check.instances.0.tags }}"
 
     # - name: stop the server number 3 
     #   ec2:
@@ -74,7 +113,7 @@
     #     max_size: 3
     #     desired_capacity: 0
 
-    - name: add all the instances to the auto scaling group 
+    # - name: add all the instances to the auto scaling group 
       
 
 # # # Deregister AMI (delete associated snapshots too)

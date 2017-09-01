@@ -16,6 +16,22 @@ A description of the settable variables for this role should go here, including 
 
 ansible-playbook 02.replicaset.yml -i inventories/skamon_demoapp_rs --extra-vars '{"replset_name":"rsdemo","mongo_port":28000}' 
 
+
+Install the utilities
+--------------
+
+Each server of replicaSet are expected to have certain utilities preinstalled on them. Make sure the inventories/rs_servers is renamed accordingly should you choose to change it.
+
+ansible-playbook 03.install.utils.yml -i inventories/skamon_demoapp_rs
+
+Create Auto Scaling Group
+------------
+
+
+
+ansible-playbook 04.create.auto.scale.group.yml  -i inventories/skamon_demoapp_rs
+
+
 Integrity Check
 ------------
 

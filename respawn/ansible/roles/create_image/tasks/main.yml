@@ -1,0 +1,30 @@
+---
+
+- name: get the aws instance from ip address
+  ec2_remote_facts:
+    region: "{{ region }}"
+    filters:
+      private_dns_name: "{{ private_dns }}"
+  register: instance_check
+
+- name: print the server instance id
+  debug: msg="{{ instance_check.instances.0.id }}"
+
+- name: create an ami image of current instance
+  ec2_ami:
+    region: "{{ region }}"
+    instance_id: "{{ instance_check.instances.0.id }}"
+    wait: yes
+    name: "{{ami_name}}"
+    device_mapping:
+      - device_name: /dev/sda1
+        size: 10
+        delete_on_termination: true
+        volume_type: gp2
+      - device_name: /dev/xvdf
+        volume_type: gp2
+        size: 4
+        delete_on_termination: true
+      - device_name: /dev/xvdb
+        no_device: yes
+  register: image

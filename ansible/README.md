@@ -16,10 +16,13 @@ A description of the settable variables for this role should go here, including 
 
 ansible-playbook 02.replicaset.yml -i inventories/skamon_demoapp_rs --extra-vars '{"replset_name":"rsdemo","mongo_port":28000}' 
 
-Dependencies
+Integrity Check
 ------------
 
 A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+
+ansible-playbook 10.check.mounts.yml  -i inventories/skamon_demoapp_rs
+
 
 Plan of execution
 ----------------
@@ -58,7 +61,14 @@ ami_skamon_demoapp_rs
 lc_skamon_demoapp_rs
 asg_skamon_demoapp_rs
 
-	
+aws:autoscaling:groupName	ami2_skamon_demoapp_rs
+
+server_group_name	skamon_demoapp_rs
+
+
+https://github.com/atplanet/ansible-auto-scaling-tutorial
+http://vcdxpert.com/?p=193
+
 pending
 Unhealthy
 

@@ -1,4 +1,5 @@
 ---
+# defaults file for launch_configuration
 app_mount_path: "/data"
 ami_name: "ami_skamon_demoapp_rs"
 region: "us-west-2"

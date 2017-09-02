@@ -1,0 +1,22 @@
+---
+# tasks file for launch_configuration
+- name: display ami values
+  debug: msg="ami_image [{{ ami_image }}]" 
+
+- name: create launch configuration
+  ec2_lc:
+    name:  "{{ lc_name }}"
+    image_id: "{{ ami_image.image_id }}"
+    region: "{{region}}"
+    key_name: "{{ key_name }}"
+    security_groups: "{{ security_groups }}"
+    instance_type: t2.micro
+    assign_public_ip: yes
+  register: ec2_lc_result
+
+- name: display launch configuration values
+  debug: msg="lc [{{ ec2_lc_result }}]" 
+
+- name: save launch_config value as fact
+  set_fact: 
+    launch_config: ec2_lc_result

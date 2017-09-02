@@ -41,5 +41,5 @@
   with_items:
     - /var/lib/mongodb/mongod.lock
     - /var/run/mongodb/mongod.pid
-    - /data
     - "{{app_mount_path}}"
+    - /data

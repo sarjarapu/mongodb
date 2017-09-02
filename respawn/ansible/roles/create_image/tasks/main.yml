@@ -27,4 +27,13 @@
         delete_on_termination: true
       - device_name: /dev/xvdb
         no_device: yes
-  register: image
+  register: ec2_ami_result
+
+- name: display ami_image value
+  debug: msg="image [{{ ec2_ami_result }}]" 
+
+- name: save ami_image value as fact
+  set_fact: 
+    ami_image: "{{ ec2_ami_result }}"
+
+# image.image_id

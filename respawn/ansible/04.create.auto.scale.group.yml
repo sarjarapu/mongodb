@@ -16,13 +16,17 @@
 #       name: create_image
 #       tasks_from: "unhook_resources"
 
-# - name: install the utilities or tools
+# - name: invoke the create image role
 #   hosts: local
 #   vars:
-#     - ami_name: "ami5_skamon_demoapp_rs"
+#     - ami_name: "ami3_skamon_demoapp_rs"
+#     - lc_name: "lc3_skamon_demoapp_rs"
 #     - private_dns: "{{ hostvars[groups.rs_servers[2]].private_dns }}"
 #   roles:
 #     - role: create_image
+#     - role: launch_configuration
+#     - role: auto_scaling_group
+#       asg_name: "asg3_skamon_demoapp_rs"
 
 # - name: hookup the resources on server 3
 #   hosts: rs_servers[2]
@@ -31,10 +35,14 @@
 #       name: create_image
 #       tasks_from: "hookup_resources"
 
-
-
-
-
+- name: attach the instance ids to the auto_scaling_group
+  hosts: rs_servers
+  vars:
+    - asg_name: "asg3_skamon_demoapp_rs"
+  tasks:
+    - include_role:
+        name: auto_scaling_group
+        tasks_from: "attach"
 
 
 

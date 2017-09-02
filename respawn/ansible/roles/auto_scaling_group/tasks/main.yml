@@ -1,0 +1,21 @@
+---
+- name: create automatic scaling group
+  ec2_asg:
+    region: "{{ region }}"
+    name: "{{ asg_name }}"
+    launch_config_name: "{{ lc_name }}"
+    health_check_period: 60
+    health_check_type: ELB
+    replace_all_instances: yes
+    vpc_zone_identifier: ['subnet-38241a61']
+    min_size: 0
+    max_size: 3
+    desired_capacity: 0
+  register: auto_scaling_group_result
+
+- name: print the auto scaling group details
+  debug: msg="asg [{{auto_scaling_group_result}}]"
+
+- name: save ami_image value as fact
+  set_fact: 
+    auto_scaling_group: "{{ auto_scaling_group_result }}"

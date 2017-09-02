@@ -1,7 +1,7 @@
 ---
 
 
-- name: collecting the instance facts
+- name: collect the instance facts
   ec2_facts:
   register: current_instance
 

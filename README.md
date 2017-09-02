@@ -190,3 +190,6 @@ find the volumes by the tags and force detach and attach
 # invoke something on the i5 the updates the fstab, mounts data points etc 
 
 
+172.31.6.108	skamon_demoapp_rs03.respawn.internal
+172.31.12.14	skamon_demoapp_rs02.respawn.internal
+172.31.4.78		skamon_demoapp_rs01.respawn.internal

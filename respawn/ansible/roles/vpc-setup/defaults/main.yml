@@ -1,0 +1,14 @@
+---
+# defaults file for vpc-setup'
+network_name: "ska_uswest2"
+vpc_name: "vpc {{ network_name }}"
+dhcp_options_name: "dopts {{ network_name }}"
+domain_name: "whitepapers.mongodb.com"
+vpc_cidr_block: "10.12.0.0/16"
+public_subnet_name: "{{ vpc_name }} public subnet"
+private_subnet_name: "{{ vpc_name }} private subnet"
+public_subnet_cidr_block: "10.12.10.0/24"
+private_subnet_cidr_block: "10.12.200.0/24"
+region: "us-west-2"
+private_routetable_name: "{{ private_subnet_name }} rt nat"
+public_routetable_name: "{{ public_subnet_name }} rt igw"

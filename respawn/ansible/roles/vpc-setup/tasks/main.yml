@@ -1,0 +1,126 @@
+---
+
+- name: create a vpc for your application
+  ec2_vpc_net:
+    region: "{{ region }}"
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ vpc_cidr_block }}"
+    dns_support: yes
+    dns_hostnames: yes
+  register: vpc_result
+
+- name: print the vpc_result
+  debug: msg="vpc_result [{{ vpc_result }}]"
+
+- name: create public subnet for vpc
+  ec2_vpc_subnet:
+    region: "{{ region }}"
+    state: present
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    cidr: "{{ public_subnet_cidr_block }}"
+    tags:
+      Name: "{{ public_subnet_name }}"
+  register: public_subnet_result
+
+- name: print the public_subnet_result
+  debug: msg="public_subnet_result [{{ public_subnet_result }}]"
+
+- name: create private subnet for MongoDB servers
+  ec2_vpc_subnet:
+    region: "{{ region }}"
+    state: present
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    cidr: "{{ private_subnet_cidr_block }}"
+    resource_tags:
+      Name: "{{ private_subnet_name }}"
+  register: private_subnet_result
+
+- name: print the private_subnet_result
+  debug: msg="private_subnet_result [{{ private_subnet_result }}]"
+
+- name: create dhcp options for the vpc
+  ec2_vpc_dhcp_options:
+    region: "{{ region }}"
+    domain_name: "{{ domain_name }}"
+    dns_servers:
+      - "AmazonProvidedDNS"
+    vpc_id:  "{{ vpc_result.vpc.id }}"
+    tags:
+      Name: "{{ domain_name }}"
+  register: dhcp_opts_result
+
+- name: print the dhcp_opts_result
+  debug: msg="dhcp_opts_result [{{ dhcp_opts_result }}]"
+
+- name: associate a dhcp options set with above vpc
+  ec2_vpc_dhcp_options:
+    region: "{{ region }}"
+    dhcp_options_id: "{{ dhcp_opts_result.dhcp_options_id }}"
+    vpc_id: "{{ vpc_result.vpc.id }}"
+
+- name: create an internet gateway for the vpc
+  ec2_vpc_igw:
+    region: "{{ region }}"
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    state: present
+  register: igw_result
+
+- name: print the igw_result
+  debug: msg="igw_result [{{ igw_result }}]"
+
+- name: create new nat gateway and allocate new eip.
+  ec2_vpc_nat_gateway:
+    region: "{{ region }}"
+    state: present
+    subnet_id: "{{ private_subnet_result.subnet.id }}"
+    wait: yes
+  register: natgw_result
+
+- name: print the natgw_result
+  debug: msg="natgw_result [{{ natgw_result }}]"
+
+- name: setup public subnet route table
+  ec2_vpc_route_table:
+    region: "{{ region }}"
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    tags:
+      Name: "{{ public_routetable_name }}"
+    subnets:
+      - "{{ public_subnet_result.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw_result.gateway_id }}"
+  register: public_route_table
+
+- name: print the public_route_table
+  debug: msg="public_route_table [{{ public_route_table }}]"
+
+- name: setup NAT-protected route table
+  ec2_vpc_route_table:
+    region: "{{ region }}"
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    tags:
+      Name: "{{ private_routetable_name }}"
+    subnets:
+      - "{{ private_subnet_result.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        instance_id: "{{ natgw_result.nat_gateway_id }}"
+  register: nat_route_table
+
+
+# - name: setup NAT-protected route table
+#   ec2_vpc_route_table:
+#     region: "us-west-2"
+#     vpc_id: "vpc-c3b238a5"
+#     tags:
+#       Name: "vpc ska_uswest2 private subnet rt nat"
+#     subnets:
+#       - "subnet-e7aec4bc"
+#     routes:
+#       - dest: 0.0.0.0/0
+#         instance_id: "nat-0065d22da5cddadd8"
+#   register: nat_route_table
+
+- name: print the nat_route_table
+  debug: msg="nat_route_table [{{ nat_route_table }}]"

@@ -1,7 +1,7 @@
 [rs_servers]
 ec2-54-244-40-17.us-west-2.compute.amazonaws.com private_dns=ip-172-31-6-108.us-west-2.compute.internal bind_ip=172.31.6.108 fqdn=skamon_demoapp_rs03.respawn.internal
 ec2-34-209-148-176.us-west-2.compute.amazonaws.com private_dns=ip-172-31-12-14.us-west-2.compute.internal bind_ip=172.31.12.14 fqdn=skamon_demoapp_rs02.respawn.internal
-ec2-54-200-54-2.us-west-2.compute.amazonaws.com private_dns=ip-172-31-4-78.us-west-2.compute.internal bind_ip=172.31.4.78 fqdn=skamon_demoapp_rs01.respawn.internal
+ec2-34-209-232-58.us-west-2.compute.amazonaws.com private_dns=ip-172-31-6-74.us-west-2.compute.internal bind_ip=172.31.6.74 fqdn=skamon_demoapp_rs01.respawn.internal
 
 [local]
 localhost ansible_connection=local ansible_python_interpreter=python

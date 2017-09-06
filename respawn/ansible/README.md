@@ -1,5 +1,160 @@
+https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
+https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
+NAT Gateways - http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-nat-gateway.html
+https://aws.amazon.com/blogs/compute/building-a-dynamic-dns-for-route-53-using-cloudwatch-events-and-lambda/
+
+Building a Dynamic DNS for Route 53 using CloudWatch Events and Lambda - https://aws.amazon.com/blogs/compute/building-a-dynamic-dns-for-route-53-using-cloudwatch-events-and-lambda/
+
+What is Amazon VPC? - http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html
+
+Getting Started With Amazon VPC - http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/getting-started-ipv4.html
+
+Scenario 2: VPC with Public and Private Subnets (NAT)- http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Scenario2.html
+
+# How to respawn MongoDB server?
+
+One Paragraph of project description goes here
+
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+### Prerequisites
+
+What things you need to install the software and how to install them
+
+```
+Give examples
+```
+
+### Create VPC for your application
+
+In a typical multi-tier web applications, you may want to have web servers in a public subnet and the database servers, such as MongoDB, in a private subnet. You can set up security and routing so that the web servers can communicate with the database servers. This helps your prevent any direct attacks on your MongoDB server from public internet.
+
+You could achieve this by having a virtual private cloud (VPC) with a public subnet and a private subnet. The instances in the public subnet can send outbound traffic directly to the Internet, whereas the instances in the private subnet can't. Instead, the instances in the private subnet can access the Internet by using a network address translation (NAT) gateway that resides in the public subnet. The database servers can connect to the Internet for software updates using the NAT gateway, but the Internet cannot establish connections to the database servers. http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Scenario2.html
+
+
+To create a VPC for your application, run the below ansible script. You may want to change the default vars in roles/vpc-setup/defaults/main.yml to fit your needs
+
+```
+ansible-playbook 00.create.vpc.yml
+```
+
+or override them via --extra-vars
+
+```
+ansible-playbook 00.create.vpc.yml --extra-vars 'network_name=<your appname> domain_name <your_domain_name>'
+``` 
+
+The above Ansible script, creates the following components
+
+* a VPC with default CIDR block of 10.12.0.0/16 in us-west-2 region
+* a public subnet with default CIDR block of 10.12.100.0/24
+* a private subnet with default CIDR block of 10.12.210.0/24 in availability zone us-west-2a
+* a private subnet with default CIDR block of 10.12.220.0/24 in availability zone us-west-2b
+* a private subnet with default CIDR block of 10.12.230.0/24 in availability zone us-west-2c
+* an Internet Gateway
+* an Elastic IP address for NAT
+* a Network Address Translation (NAT) device
+* a route table associated with public subnet to allow IPv4 Internet traffic (0.0.0.0/0) to the Internet Gateway.
+* a route table associated with private subnet to allow IPv4 Internet traffic (0.0.0.0/0) to the NAT device.
+
+For illustration purposes, here is a network diagram of the above setup from Amazon documentation (although it shows different CIDR blocks and only two availability zones)
+
+![Network Diagram](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/images/nat-gateway-diagram.png)
+
+To further strengthen the security of your MongoDB deployment, I strongly recommend you to review the [MongoDB security checklist] (https://docs.mongodb.com/manual/administration/security-checklist/) white paper.
+
+### Installing
+
+A step by step series of examples that tell you have to get a development env running
+
+Say what the step will be
+
+```
+Give the example
+```
+
+And repeat
+
+```
+until finished
+```
+
+End with an example of getting some data out of the system or using it for a little demo
+
+## Running the tests
+
+Explain how to run the automated tests for this system
+
+### Break down into end to end tests
+
+Explain what these tests test and why
+
+```
+Give an example
+```
+
+### And coding style tests
+
+Explain what these tests test and why
+
+```
+Give an example
+```
+
+## Deployment
+
+Add additional notes about how to deploy this on a live system
+
+## Built With
+
+* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
+* [Maven](https://maven.apache.org/) - Dependency Management
+* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+
+## Contributing
+
+Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+
+## Authors
+
+* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+
+See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments
+
+* Hat tip to anyone who's code was used
+* Inspiration
+* etc
+
+
+
+
+
+
 How to use this ansible
 =========
+
+
+Create VPC
+------------
+
+Create a VPC . Check all the default vars in roles/vpc-setup/defaults/main.yml 
+
+ansible-playbook 00.create.vpc.yml
+
+You can use a network address translation (NAT) gateway to enable instances in a private subnet to connect to the Internet or other AWS services, but prevent the Internet from initiating a connection with those instances. For more information about NAT, see NAT. 
 
 
 Configure
@@ -52,12 +207,6 @@ ansible-playbook 03.install.utils.yml -i 'ec2-34-213-92-128.us-west-2.compute.am
 
 
 
-Create VPC
-------------
-
-Create a VPC and Dynamic DNS. Check all the default vars in roles/vpc-setup/defaults/main.yml 
-
-ansible-playbook 00.create.vpc.yml
 
 
 Provision Hardware
@@ -144,8 +293,6 @@ Python or Nodejs - for reading from aws
 Shell or Ansible
 DynamoDB or MongoDB - for reading from db
 
-curl http://169.254.169.254/latest/meta-data/
-http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
 
 ami_skamon_demoapp_rs
 lc_skamon_demoapp_rs
@@ -190,3 +337,7 @@ Author Information
 ------------------
 
 An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+
+
+curl http://169.254.169.254/latest/meta-data/
+http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html

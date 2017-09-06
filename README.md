@@ -1,3 +1,5 @@
+
+
 Install MongoDB
 =========
 
@@ -133,6 +135,7 @@ aws --version
 
 https://www.youtube.com/watch?v=Qn8uGcfBb_I
 https://www.youtube.com/watch?v=CP7yd7nOb5Q
+http://jeremievallee.com/2016/07/27/aws-vpc-ansible/
 
 VPC configuration 
 routable 

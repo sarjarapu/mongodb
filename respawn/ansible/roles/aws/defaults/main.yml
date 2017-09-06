@@ -9,7 +9,7 @@ replset_prefix: "rs"
 server_number: "01"
 ssh_user: "ec2-user"
 tag_owner: "shyam.arjarapu"
-fqdn_domain: "respawn.internal"
+fqdn_domain: "whitepapers.mongodb.com"
 
 instance_name: "{{ group_name }}_{{ app_name }}_{{replset_prefix}}{{ server_number }}"
 server_group_name: "{{ group_name}}_{{ app_name }}_{{replset_prefix}}"
@@ -18,6 +18,10 @@ fqdn: "{{instance_name}}.{{ fqdn_domain }}"
 region: "us-west-2"
 security_key: "ska-play"
 security_group: "ska-sg-aws"
+
+vpc_subnet_id: ""
+assign_public_ip: "yes"
+
 redhat_ami: "ami-9fa343e7"
 
 

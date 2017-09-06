@@ -95,6 +95,7 @@
 - name: print the public_route_table
   debug: msg="public_route_table [{{ public_route_table }}]"
 
+## Is not working for some reason
 - name: setup NAT-protected route table
   ec2_vpc_route_table:
     region: "{{ region }}"
@@ -108,7 +109,10 @@
         instance_id: "{{ natgw_result.nat_gateway_id }}"
   register: nat_route_table
 
+- name: print the nat_route_table
+  debug: msg="nat_route_table [{{ nat_route_table }}]"
 
+## not working 
 # - name: setup NAT-protected route table
 #   ec2_vpc_route_table:
 #     region: "us-west-2"
@@ -122,5 +126,5 @@
 #         instance_id: "nat-0065d22da5cddadd8"
 #   register: nat_route_table
 
-- name: print the nat_route_table
-  debug: msg="nat_route_table [{{ nat_route_table }}]"
+# - name: print the nat_route_table
+#   debug: msg="nat_route_table [{{ nat_route_table }}]"

@@ -136,6 +136,8 @@ https://www.youtube.com/watch?v=CP7yd7nOb5Q
 
 VPC configuration 
 routable 
+create nat in public subnet  ?
+
 main -> nat 
 igw -> subnet assoc, edit add public subnet 
 lambda func -> private subnets; security group all to private 

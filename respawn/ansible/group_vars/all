@@ -1,4 +1,6 @@
 ---
 ansible_ssh_user: ec2-user
 
-
+security_key: "ska-play"
+security_group: "sg ska_uswest2"
+security_groups: ["sg-1d090967"]

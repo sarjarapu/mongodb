@@ -42,8 +42,8 @@
 
 - name: copy the aws private key
   copy:
-    src: "/Users/shyamarjarapu/.ssh/amazonaws_rsa"
-    dest: "/home/ec2-user/.ssh/amazonaws_rsa"
+    src: "{{ source_pem_key_file }}"
+    dest: "{{ target_pem_key_file }}"
     owner: ec2-user
     group: ec2-user
     mode: 0400

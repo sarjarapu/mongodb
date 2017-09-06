@@ -17,6 +17,8 @@
       region: "{{ region }}"
       zone: "{{ availability_zone }}"
       group: "{{ security_group }}"
+      vpc_subnet_id: "{{ vpc_subnet_id }}"
+      assign_public_ip: "{{ assign_public_ip }}"
       instance_type: "{{ instance_type }}"
       image: "{{ ami }}"
       wait: yes

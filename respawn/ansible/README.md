@@ -1,12 +1,71 @@
 How to use this ansible
 =========
 
+
+Configure
+------------
+
+Configure your ansible-vault password at file private/.vault_pass
+Update the group_vars/rs_servers/vault and reencrypt using below command 
+
+ansible-vault encrypt group_vars/rs_servers/vault
+
+edit the ansible.cfg with values private_key_file to your appropriate AWS PEM key file
+
+roles/aws/defaults
+fqdn_domain: "respawn.internal"
+security_key: "ska-play"
+security_group: "ska-sg-aws"
+
+create-image, launch-configuration
+security_groups: ["sg-aafa79d3"]
+
+TODO: 
+Work upon the security group configuration
+Create separate security group for public / private 
+subnet is in 2b -> set to 2c 
+ 
+
+brew install jq
+sudo yum install -y jq
+
+export AWS_ACCESS_KEY_ID='XXXXXXXX'
+export AWS_SECRET_ACCESS_KEY='XXXXXXXXXXXXXXXX'
+
+
+
+ansible-playbook 03.install.utils.yml -i 'ec2-34-213-92-128.us-west-2.compute.amazonaws.com' --connection=local
+
+cd ..
+rm -f ansible.tar.gz
+tar -cvzf ansible.tar.gz ansible/
+scp -i ~/.ssh/ava-us-west-2.pem   ansible.tar.gz ec2-user@ec2-34-213-92-128.us-west-2.compute.amazonaws.com:/home/ec2-user/
+cd ansible/
+
+ssh -i ~/.ssh/ava-us-west-2.pem ec2-user@ec2-34-213-92-128.us-west-2.compute.amazonaws.com
+cd ~/
+rm -f ansible/
+tar -xvzf ansible.tar.gz 
+cd ansible
+
+ansible-playbook 03.install.utils.yml -i 'ec2-34-213-92-128.us-west-2.compute.amazonaws.com,' --extra-vars='vault_aws_access_key=XXXXXX vault_aws_secret_key=XXXXXXXXXXXX'
+
+
+
+Create VPC
+------------
+
+Create a VPC and Dynamic DNS 
+
+ansible-playbook 00.create.vpc.yml
+
+
 Provision Hardware
 ------------
 
 Run the below command to provision a replicaset of 3 members. Each member would be create in AWS, ebs volumes for swap and MongoDB data, populates both instances and volumes with certain tags. A new inventory file is created in inventories/<_server_group_name_>
 
-ansible-playbook 01.provision.yml
+ansible-playbook 01.provision.yml --extra-vars='security_key=ava-us-west-2 security_group=default vpc_subnet_id=subnet-74d37412 availability_zone=us-west-2b'
 
 
 Create replicaset
@@ -14,15 +73,30 @@ Create replicaset
 
 A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
 
+missed the ansible.cfg settings pointing to /home/ec2-user/
+scp -i ~/.ssh/ava-us-west-2.pem   ~/.ssh/ava-us-west-2.pem ec2-user@ec2-34-213-92-128.us-west-2.compute.amazonaws.com:/home/ec2-user/.ssh/
+
+no internet
+create nat in public subnet not private 
+10.12.200.0/24,10.12.100.0/24
+
+private_key_file = /Users/shyamarjarapu/.ssh/ava-us-west-2.pem
+changed the hosts to use internal ips rather than public ips for ansible inventory
+
 ansible-playbook 02.replicaset.yml -i inventories/skamon_demoapp_rs --extra-vars '{"replset_name":"rsdemo","mongo_port":28000}' 
 
+make the alias resolvable to private dns not public
 
 Install the utilities
 --------------
 
 Each server of replicaSet are expected to have certain utilities preinstalled on them. Make sure the inventories/rs_servers is renamed accordingly should you choose to change it.
 
-ansible-playbook 03.install.utils.yml -i inventories/skamon_demoapp_rs
+public ip address in inventory file?
+no outgoing internet 
+had to manually flip the hosts:all to hosts:rs_servers
+
+ansible-playbook 03.install.utils.yml -i inventories/skamon_demoapp_rs --extra-vars='source_pem_key_file=/home/ec2-user/.ssh/ava-us-west-2.pem'
 
 Create Auto Scaling Group
 ------------

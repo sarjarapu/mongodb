@@ -55,7 +55,7 @@ ansible-playbook 03.install.utils.yml -i 'ec2-34-213-92-128.us-west-2.compute.am
 Create VPC
 ------------
 
-Create a VPC and Dynamic DNS 
+Create a VPC and Dynamic DNS. Check all the default vars in roles/vpc-setup/defaults/main.yml 
 
 ansible-playbook 00.create.vpc.yml
 

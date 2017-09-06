@@ -25,18 +25,47 @@
 - name: print the public_subnet_result
   debug: msg="public_subnet_result [{{ public_subnet_result }}]"
 
-- name: create private subnet for MongoDB servers
+- name: create private subnet A for MongoDB servers
   ec2_vpc_subnet:
     region: "{{ region }}"
+    az: "{{ region }}a"
     state: present
     vpc_id: "{{ vpc_result.vpc.id }}"
-    cidr: "{{ private_subnet_cidr_block }}"
-    resource_tags:
-      Name: "{{ private_subnet_name }}"
-  register: private_subnet_result
+    cidr: "{{ private_subnet_a_cidr_block }}"
+    tags:
+      Name: "{{ private_subnet_a_name }}"
+  register: private_subnet_a_result
 
-- name: print the private_subnet_result
-  debug: msg="private_subnet_result [{{ private_subnet_result }}]"
+- name: print the private_subnet_a_result
+  debug: msg="private_subnet_a_result [{{ private_subnet_a_result }}]"
+
+- name: create private subnet B for MongoDB servers
+  ec2_vpc_subnet:
+    region: "{{ region }}"
+    az: "{{ region }}b"
+    state: present
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    cidr: "{{ private_subnet_b_cidr_block }}"
+    tags:
+      Name: "{{ private_subnet_b_name }}"
+  register: private_subnet_b_result
+
+- name: print the private_subnet_b_result
+  debug: msg="private_subnet_b_result [{{ private_subnet_b_result }}]"
+
+- name: create private subnet C for MongoDB servers
+  ec2_vpc_subnet:
+    region: "{{ region }}"
+    az: "{{ region }}c"
+    state: present
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    cidr: "{{ private_subnet_c_cidr_block }}"
+    tags:
+      Name: "{{ private_subnet_c_name }}"
+  register: private_subnet_c_result
+
+- name: print the private_subnet_c_result
+  debug: msg="private_subnet_c_result [{{ private_subnet_c_result }}]"
 
 - name: create dhcp options for the vpc
   ec2_vpc_dhcp_options:
@@ -58,26 +87,18 @@
     dhcp_options_id: "{{ dhcp_opts_result.dhcp_options_id }}"
     vpc_id: "{{ vpc_result.vpc.id }}"
 
+
 - name: create an internet gateway for the vpc
   ec2_vpc_igw:
     region: "{{ region }}"
     vpc_id: "{{ vpc_result.vpc.id }}"
     state: present
+    # tags:
+    #   Name: "igw_{{ network_name }}"
   register: igw_result
 
 - name: print the igw_result
   debug: msg="igw_result [{{ igw_result }}]"
-
-- name: create new nat gateway and allocate new eip.
-  ec2_vpc_nat_gateway:
-    region: "{{ region }}"
-    state: present
-    subnet_id: "{{ private_subnet_result.subnet.id }}"
-    wait: yes
-  register: natgw_result
-
-- name: print the natgw_result
-  debug: msg="natgw_result [{{ natgw_result }}]"
 
 - name: setup public subnet route table
   ec2_vpc_route_table:
@@ -95,36 +116,63 @@
 - name: print the public_route_table
   debug: msg="public_route_table [{{ public_route_table }}]"
 
-## Is not working for some reason
-- name: setup NAT-protected route table
+
+- name: create new nat gateway and allocate new eip.
+  ec2_vpc_nat_gateway:
+    region: "{{ region }}"
+    state: present
+    subnet_id: "{{ public_subnet_result.subnet.id }}"
+    wait: yes
+    wait_timeout: 600
+    # tags:
+    #   Name: "nat_{{ network_name }}"
+  register: natgw_result
+
+- name: print the natgw_result
+  debug: msg="natgw_result [{{ natgw_result }}]"
+
+- name: setup nat protected route table
   ec2_vpc_route_table:
     region: "{{ region }}"
     vpc_id: "{{ vpc_result.vpc.id }}"
     tags:
       Name: "{{ private_routetable_name }}"
     subnets:
-      - "{{ private_subnet_result.subnet.id }}"
+      - "{{ private_subnet_a_result.subnet.id }}"
+      - "{{ private_subnet_b_result.subnet.id }}"
+      - "{{ private_subnet_c_result.subnet.id }}"
     routes:
       - dest: 0.0.0.0/0
-        instance_id: "{{ natgw_result.nat_gateway_id }}"
+        gateway_id: "{{ natgw_result.nat_gateway_id }}"
   register: nat_route_table
 
 - name: print the nat_route_table
   debug: msg="nat_route_table [{{ nat_route_table }}]"
 
-## not working 
-# - name: setup NAT-protected route table
-#   ec2_vpc_route_table:
-#     region: "us-west-2"
-#     vpc_id: "vpc-c3b238a5"
-#     tags:
-#       Name: "vpc ska_uswest2 private subnet rt nat"
-#     subnets:
-#       - "subnet-e7aec4bc"
-#     routes:
-#       - dest: 0.0.0.0/0
-#         instance_id: "nat-0065d22da5cddadd8"
-#   register: nat_route_table
+- name: create ssh group for public subnet
+  ec2_group:
+    name: "{{security_group_public_ssh}}"
+    description: security group to allow ssh for public subnet
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
 
-# - name: print the nat_route_table
-#   debug: msg="nat_route_table [{{ nat_route_table }}]"
+- name: create all group for private subnet
+  ec2_group:
+    name: "{{security_group_private_all}}"
+    description: security group to allow all for private subnet
+    vpc_id: "{{ vpc_result.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: "{{ vpc_cidr_block }}"
+      - proto: tcp
+        from_port: "{{mongo_port}}"
+        to_port: "{{mongo_port}}"
+        cidr_ip: "{{ vpc_cidr_block }}"

@@ -1,0 +1,5 @@
+---
+- name: create dynamic dns for your VPC 
+  hosts: local
+  roles:
+    - role: "dyndns-setup"

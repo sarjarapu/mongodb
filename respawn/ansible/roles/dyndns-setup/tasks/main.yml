@@ -1,0 +1,8 @@
+---
+
+- name: create policy for lambda
+  shell: /bin/sh roles/dyndns-setup/files/run.sh
+  register: shell_result
+
+- name: display the shell output
+  debug: msg="shell output [{{ shell_result }}]"

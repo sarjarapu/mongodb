@@ -1,5 +1,6 @@
 https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+http://jeremievallee.com/2016/07/27/aws-vpc-ansible/
 
 NAT Gateways - http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-nat-gateway.html
 https://aws.amazon.com/blogs/compute/building-a-dynamic-dns-for-route-53-using-cloudwatch-events-and-lambda/
@@ -30,24 +31,11 @@ Give examples
 
 ### Create VPC for your application
 
-In a typical multi-tier web applications, you may want to have web servers in a public subnet and the database servers, such as MongoDB, in a private subnet. You can set up security and routing so that the web servers can communicate with the database servers. This helps your prevent any direct attacks on your MongoDB server from public internet.
+In a typical multi-tier web applications, you may want to have web servers in a public subnet and the database servers, such as MongoDB, in a private subnet. You can set up security and routing so that the web servers can communicate with the database servers. This helps you prevent any direct attacks on your MongoDB server from public internet.
 
-You could achieve this by having a virtual private cloud (VPC) with a public subnet and a private subnet. The instances in the public subnet can send outbound traffic directly to the Internet, whereas the instances in the private subnet can't. Instead, the instances in the private subnet can access the Internet by using a network address translation (NAT) gateway that resides in the public subnet. The database servers can connect to the Internet for software updates using the NAT gateway, but the Internet cannot establish connections to the database servers. http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Scenario2.html
+You could achieve this isolation of network by having a virtual private cloud (VPC) with a public subnet and a private subnet. The instances in the public subnet can send outbound traffic directly to the Internet, whereas the instances in the private subnet can't. Instead, the instances in the private subnet can access the Internet by using a network address translation (NAT) gateway that resides in the public subnet. The database servers can connect to the Internet for software updates using the NAT gateway, but the Internet cannot establish connections to the database servers. http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Scenario2.html
 
-
-To create a VPC for your application, run the below ansible script. You may want to change the default vars in roles/vpc-setup/defaults/main.yml to fit your needs
-
-```
-ansible-playbook 00.create.vpc.yml
-```
-
-or override them via --extra-vars
-
-```
-ansible-playbook 00.create.vpc.yml --extra-vars 'network_name=<your appname> domain_name <your_domain_name>'
-``` 
-
-The above Ansible script, creates the following components
+In the source I have created an Ansible playbook to create the following components
 
 * a VPC with default CIDR block of 10.12.0.0/16 in us-west-2 region
 * a public subnet with default CIDR block of 10.12.100.0/24
@@ -60,11 +48,35 @@ The above Ansible script, creates the following components
 * a route table associated with public subnet to allow IPv4 Internet traffic (0.0.0.0/0) to the Internet Gateway.
 * a route table associated with private subnet to allow IPv4 Internet traffic (0.0.0.0/0) to the NAT device.
 
-For illustration purposes, here is a network diagram of the above setup from Amazon documentation (although it shows different CIDR blocks and only two availability zones)
+For illustration purposes, here is a network diagram of the above setup from Amazon documentation (Note: Diagram shows different CIDR blocks and only two availability zones)
 
 ![Network Diagram](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/images/nat-gateway-diagram.png)
 
 To further strengthen the security of your MongoDB deployment, I strongly recommend you to review the [MongoDB security checklist] (https://docs.mongodb.com/manual/administration/security-checklist/) white paper.
+
+#### Hands-on: Steps to create VPC
+To create a VPC for your application, run the below ansible script. You may want to change the default vars in roles/vpc-setup/defaults/main.yml to fit your needs
+
+```
+ansible-playbook 00.create.vpc.yml
+```
+
+or override them via --extra-vars
+
+```
+ansible-playbook 00.create.vpc.yml --extra-vars 'network_name=<your appname> domain_name <your_domain_name>'
+``` 
+
+
+### Create Dynamic DNS service
+
+Assumptions jq dependecy is installed  
+
+#### Hands-on: Steps to create VPC
+
+```
+ansible-playbook 00.create.dyndns.yml
+```
 
 ### Installing
 
@@ -341,3 +353,15 @@ An optional section for the role authors to include contact information, or a we
 
 curl http://169.254.169.254/latest/meta-data/
 http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+
+
+Stand up call 
+Jay, Dhru, Khaja
+Technical review of the code for tomorrow 
+
+How we are connecting to the db 
+two different application, stand alone java app 
+and another in containers / websphere 
+when I tried to connect to localhost, configure the 
+console to dev works fine but the application cannot 
+ 
